@@ -15,4 +15,33 @@ theme = "hermit_zola"
 highlight_code = true
 
 [extra]
-# Put all your custom variables here
+home_subtitle = "robbins.cc static site"
+
+footer_copyright = ''
+
+hermit_menu = [
+    { link = "/posts", name = "Posts" },
+    { link = "/about", name = "About" }
+]
+
+hermit_social = [
+    { name = "github", link = "https://github.com/robbins" },
+]
+
+[extra.highlightjs]
+enable = true
+clipboard = true
+theme = "vs2015"
+
+[extra.disqus]
+enable = false
+# Take this from your Disqus account
+shortname = "my-supa-dupa-blog"
+
+[extra.author]
+name = "Nathanael Robbins"
+email = "author@domain.com"
+
+[extra.google_analytics]
+enable = false
+id = "UA-4XXXXXXX-X"
