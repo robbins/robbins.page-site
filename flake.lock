@@ -1,0 +1,44 @@
+{
+  "nodes": {
+    "hermit-zola": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1649343104,
+        "narHash": "sha256-tiry4rMOnduQ2JtnpgxRqBsMLICr7JuxaMlONGfwSpA=",
+        "owner": "VersBinarii",
+        "repo": "hermit_zola",
+        "rev": "36009d83123a83ca2a06af36bbc01a6d4bd10ae6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "VersBinarii",
+        "repo": "hermit_zola",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1672428209,
+        "narHash": "sha256-eejhqkDz2cb2vc5VeaWphJz8UXNuoNoM8/Op8eWv2tQ=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "293a28df6d7ff3dec1e61e37cc4ee6e6c0fb0847",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "hermit-zola": "hermit-zola",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
