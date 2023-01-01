@@ -7,10 +7,10 @@
   outputs = { self, nixpkgs, hermit-zola}:
     let
       themeName = "hermit";
+      pkgs = import nixpkgs { system = "x86_64-linux"; };
     in
     {
-      packages.x86_64-linux.default = with import nixpkgs { system = "x86_64-linux"; };
-      stdenv.mkDerivation {
+      packages.x86_64-linux.default = with pkgs; stdenv.mkDerivation {
         name = "robbins-cc-zola";
         src = ./.;
         buildInputs = with pkgs; [ zola ];
@@ -25,5 +25,12 @@
           cp -r public $out
         '';
       };
+      devShells."x86_64-linux".default = pkgs.mkShell {
+          packages = [ pkgs.zola ];
+          shellHook = ''
+            mkdir -p themes
+            ln -sn "${hermit-zola}" "themes/${themeName}"
+          '';
+        };
     };
 }
