@@ -6,7 +6,7 @@
   
   outputs = { self, nixpkgs, hermit-zola}:
     let
-      themeName = "hermit";
+      themeName = "hermit_zola";
       pkgs = import nixpkgs { system = "x86_64-linux"; };
     in
     {
