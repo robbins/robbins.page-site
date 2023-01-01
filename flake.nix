@@ -29,7 +29,7 @@
           packages = [ pkgs.zola ];
           shellHook = ''
             mkdir -p themes
-            ln -sn "${hermit-zola}" "themes/${themeName}"
+            ln -snf "${hermit-zola}" "themes/${themeName}"
           '';
         };
     };
