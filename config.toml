@@ -1,5 +1,5 @@
 # The URL the site will be built for
-base_url = "https://robbins.cc"
+base_url = "https://robbins.page"
 
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
@@ -16,7 +16,7 @@ title = "Nathanael Robbins"
 highlight_code = true
 
 [extra]
-home_subtitle = "robbins.cc static site"
+home_subtitle = "robbins.page static site"
 
 footer_copyright = ''
 
