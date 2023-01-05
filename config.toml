@@ -16,7 +16,7 @@ title = "Nathanael Robbins"
 highlight_code = true
 
 [extra]
-home_subtitle = "robbins.page static site"
+home_subtitle = "Computer Science Student, UofT"
 
 footer_copyright = ''
 
@@ -41,7 +41,7 @@ shortname = "my-supa-dupa-blog"
 
 [extra.author]
 name = "Nathanael Robbins"
-email = "author@domain.com"
+email = "nathanael@robbins.page"
 
 [extra.google_analytics]
 enable = false
