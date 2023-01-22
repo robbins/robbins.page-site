@@ -1,5 +1,3 @@
 +++
 title="About"
 +++
-
-Coming soon!
