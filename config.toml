@@ -21,12 +21,14 @@ home_subtitle = "Computer Science Student, UofT"
 footer_copyright = ''
 
 hermit_menu = [
-    { link = "/posts", name = "Posts" },
+    { link = "/projects", name = "Projects" },
+    { link = "/blog", name = "Blog" },
     { link = "/about", name = "About" }
 ]
 
 hermit_social = [
     { name = "github", link = "https://github.com/robbins" },
+    { name = "linkedin", link = "https://www.linkedin.com/in/nathanael-robbins-03561b96" },
 ]
 
 [extra.highlightjs]
