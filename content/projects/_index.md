@@ -1,6 +1,5 @@
 +++
-title= "Projects"
-sort_by="date"
-[extra]
-toc=true
+title = "Projects"
+sort_by = "weight"
+template = "cards.html"
 +++

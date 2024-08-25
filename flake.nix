@@ -1,12 +1,12 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    hermit-zola = { url = "github:VersBinarii/hermit_zola"; flake = false; };
+    apollo-zola = { url = "github:not-matthias/apollo"; flake = false; };
   };
   
-  outputs = { self, nixpkgs, hermit-zola}:
+  outputs = { self, nixpkgs, apollo-zola}:
     let
-      themeName = "hermit_zola";
+      themeName = "apollo";
       pkgs = import nixpkgs { system = "x86_64-linux"; };
     in
     {
@@ -16,7 +16,7 @@
         buildInputs = with pkgs; [ zola ];
         configurePhase = ''
           mkdir -p "themes/${themeName}"
-          cp -r ${hermit-zola}/* "themes/${themeName}"
+          cp -r ${apollo-zola}/* "themes/${themeName}"
         '';
         buildPhase = ''
           zola build
@@ -29,7 +29,7 @@
           packages = [ pkgs.zola ];
           shellHook = ''
             mkdir -p themes
-            ln -snf "${hermit-zola}" "themes/${themeName}"
+            ln -snf "${apollo-zola}" "themes/${themeName}"
           '';
         };
     };

@@ -1,18 +1,18 @@
 {
   "nodes": {
-    "hermit-zola": {
+    "apollo-zola": {
       "flake": false,
       "locked": {
-        "lastModified": 1649343104,
-        "narHash": "sha256-tiry4rMOnduQ2JtnpgxRqBsMLICr7JuxaMlONGfwSpA=",
-        "owner": "VersBinarii",
-        "repo": "hermit_zola",
-        "rev": "36009d83123a83ca2a06af36bbc01a6d4bd10ae6",
+        "lastModified": 1721568736,
+        "narHash": "sha256-tYbozATtUmGuGV/OSZiGfi+ArSgKgQ18Mlxajimuk5k=",
+        "owner": "not-matthias",
+        "repo": "apollo",
+        "rev": "4d3e2d2433bcca9c25135a09ed9037c7a7e82bb2",
         "type": "github"
       },
       "original": {
-        "owner": "VersBinarii",
-        "repo": "hermit_zola",
+        "owner": "not-matthias",
+        "repo": "apollo",
         "type": "github"
       }
     },
@@ -34,7 +34,7 @@
     },
     "root": {
       "inputs": {
-        "hermit-zola": "hermit-zola",
+        "apollo-zola": "apollo-zola",
         "nixpkgs": "nixpkgs"
       }
     }

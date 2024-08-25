@@ -1,50 +1,12 @@
-# The URL the site will be built for
 base_url = "https://robbins.page"
 
-# Whether to automatically compile all Sass files in the sass directory
-compile_sass = true
-
-# Whether to build a search index to be used later on by a JavaScript library
-build_search_index = false
-
-theme = "hermit_zola"
-title = "Nathanael Robbins"
-
-[markdown]
-# Whether to do syntax highlighting
-# Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
-highlight_code = true
+theme = "apollo"
+taxonomies = [{ name = "tags" }]
 
 [extra]
-home_subtitle = "Computer Science Student, UofT"
-
-footer_copyright = ''
-
-hermit_menu = [
-    { link = "/projects", name = "Projects" },
-    { link = "/blog", name = "Blog" },
-    { link = "/about", name = "About" }
+theme = "auto"
+socials = [
+]
+menu = [
 ]
 
-hermit_social = [
-    { name = "github", link = "https://github.com/robbins" },
-    { name = "linkedin", link = "https://www.linkedin.com/in/nathanael-robbins-03561b96" },
-]
-
-[extra.highlightjs]
-enable = true
-clipboard = true
-theme = "vs2015"
-
-[extra.disqus]
-enable = false
-# Take this from your Disqus account
-shortname = "my-supa-dupa-blog"
-
-[extra.author]
-name = "Nathanael Robbins"
-email = "nathanael@robbins.page"
-
-[extra.google_analytics]
-enable = false
-id = "UA-4XXXXXXX-X"
