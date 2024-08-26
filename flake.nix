@@ -1,7 +1,8 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    apollo-zola = { url = "github:not-matthias/apollo"; flake = false; };
+    #apollo-zola = { url = "github:robbins/apollo-custom"; flake = false; };
+    apollo-zola = { url = "git+file:///home/nate/src/github.com/robbins/apollo-custom"; flake = false; };
   };
   
   outputs = { self, nixpkgs, apollo-zola}:

@@ -1,12 +1,30 @@
 base_url = "https://robbins.page"
-
+title = "Nathanael (Nate) Robbins"
+build_search_index = true
+compile_sass = true
+minify_html = true
 theme = "apollo"
 taxonomies = [{ name = "tags" }]
 
+[markdown]
+highlight_code = true
+highlight_theme = "ayu-light"
+
 [extra]
-theme = "auto"
+theme = "toggle"
+fancy_code = true
+dynamic_note = true
+mathjax = true
+mathjax_dollar_inline_enable = true
 socials = [
+    { name = "github", url = "https://github.com/robbins/", icon = "github" },
+    { name = "linkedin", url = "https://www.linkedin.com/in/nathanael-robbins/", icon = "linkedin" },
 ]
 menu = [
+    { name = "/projects", url = "/projects", weight = 1 },
+    { name = "/about", url = "/about", weight = 2 },
+    { name = "/tags", url = "/tags", weight = 3 },
 ]
-
+repo_view = true
+repo_url = "https://github.com/robbins/robbins.page-site/tree/main/content"
+mathjax = true
