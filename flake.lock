@@ -3,16 +3,16 @@
     "apollo-zola": {
       "flake": false,
       "locked": {
-        "lastModified": 1721568736,
-        "narHash": "sha256-tYbozATtUmGuGV/OSZiGfi+ArSgKgQ18Mlxajimuk5k=",
-        "owner": "not-matthias",
-        "repo": "apollo",
-        "rev": "4d3e2d2433bcca9c25135a09ed9037c7a7e82bb2",
+        "lastModified": 1724709229,
+        "narHash": "sha256-C7tzJQZt62ETlUjnp9zVnUAAI7q8TdiIXnMWWbBL4ac=",
+        "owner": "robbins",
+        "repo": "apollo-custom",
+        "rev": "fca58065a72bdfe49582fc450551592a68a33f5a",
         "type": "github"
       },
       "original": {
-        "owner": "not-matthias",
-        "repo": "apollo",
+        "owner": "robbins",
+        "repo": "apollo-custom",
         "type": "github"
       }
     },
