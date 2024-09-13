@@ -5,6 +5,7 @@ compile_sass = true
 minify_html = true
 theme = "apollo"
 taxonomies = [{ name = "tags" }]
+ignored_content = ["*.{gif,jpg,png}"]
 
 [markdown]
 highlight_code = true
