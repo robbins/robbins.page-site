@@ -9,7 +9,7 @@ ignored_content = ["*.{gif,jpg,png}"]
 
 [markdown]
 highlight_code = true
-highlight_theme = "ayu-light"
+highlight_theme = "gruvbox-dark"
 
 [extra]
 theme = "toggle"
@@ -23,8 +23,9 @@ socials = [
 ]
 menu = [
     { name = "/projects", url = "/projects", weight = 1 },
-    { name = "/about", url = "/about", weight = 2 },
-    { name = "/tags", url = "/tags", weight = 3 },
+    { name = "/notes", url = "/notes", weight = 2 },
+    { name = "/about", url = "/about", weight = 3 },
+    { name = "/tags", url = "/tags", weight = 4 },
 ]
 repo_view = true
 repo_url = "https://github.com/robbins/robbins.page-site/tree/main/content"
