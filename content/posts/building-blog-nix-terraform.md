@@ -1,5 +1,5 @@
 +++
-title = "Deploying this blog with Nix, Terraform, and GitHub Actions"
+title = "Building this blog with Nix, Terraform, and GitHub Actions"
 date = "2024-08-27"
 
 [taxonomies]
