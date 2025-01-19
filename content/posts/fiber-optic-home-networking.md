@@ -6,11 +6,6 @@ date = "2024-12-13"
 tags=["networking", "fiber-optics"]
 +++
 
-- Explain SFP+ transceivers
-- Explain FS box
-- Explain SFP+ NICs
-- Explain the trouble in finding white cables
-
 # Introduction
 I recently moved into a new house, and as usual was preparing to run some CAT6a cabling to get wired internet access on certain devices. The house already had some keystone jacks in the wall with
 CAT6 cabling running to the basement, but they weren't in ideal locations. I didn't have full access to the basement, and the house didn't have an attic, so I needed to take the easy way out
