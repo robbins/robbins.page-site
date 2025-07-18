@@ -29,4 +29,3 @@ menu = [
 ]
 repo_view = true
 repo_url = "https://github.com/robbins/robbins.page-site/tree/main/content"
-mathjax = true
