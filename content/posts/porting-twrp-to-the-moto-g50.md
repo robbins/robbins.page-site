@@ -34,7 +34,7 @@ First, we need to collect some information about the device. The device can be b
 - Device codename is ibiza
 - Model number is XT2137-1
 
-By booting into recovery (reboot the phone while holding Volume Down), and then selectring fastboot, we can run the same command from userspace fastboot:
+By booting into recovery (reboot the phone while holding Volume Down), and then selecting fastboot, we can run the same command from userspace fastboot:
 {{ note(clickable=true, hidden=true, header="Bootloader variables", body="
 ```shell
 > fastboot getvar all
