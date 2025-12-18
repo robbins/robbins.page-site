@@ -1,6 +1,6 @@
 +++
 title = "About Me"
-path = "about"
+template = "prose.html"
 +++
 
 I'm currently a student at the University of Toronto studying Computer Science, Statistics, and French.

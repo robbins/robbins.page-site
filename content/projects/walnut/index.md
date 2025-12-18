@@ -1,14 +1,11 @@
 +++
 title = "Walnut"
 description = "A course scheduler app for Android with a modern UI following Material Design 3."
-weight = 1
-insert_anchor_links = "heading"
-
-#[extra]
-#local_image = "/projects/project-1.jpg"
+date = "2024-09-12"
+template = "post.html"
 +++
 
-Walnut is a course scheduling app built for CSCB07, the Software Design course at UTSC, in a team of 5.
+[Walnut](http://github.com/b07boys/walnut) is a course scheduling app built for CSCB07, the Software Design course at UTSC, in a team of 5.
 
 # Features
 - Course timeline generator that accounts for prerequisites

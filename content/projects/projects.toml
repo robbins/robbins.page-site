@@ -1,0 +1,6 @@
+[[collection]]
+type = "card"
+title = "Walnut"
+link = "/projects/walnut"
+content = "Walnut is a course scheduling app built for CSCB07, the Software Design course at UTSC, in a team of 5. While we didn't get to explore Jetpack Compose and all the niceties Kotlin has to offer, ittries to follow (as best as possible) modern Android app development guidelines under the project constraints of Java, XML, and the Model-View-Presenter pattern. The UI is built using Google's Material Design 3 components which is an easy way to get a simple, good-looking interface (while also supporting Material You!). In terms of app architecture, it follows the recommended single-activity pattern,"
+tags = ["android"]

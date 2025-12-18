@@ -39,29 +39,28 @@ on Ebay for $90 CAD - it was released in 2018 with Android 8.0 and only runs Lin
 Let's check out Sony's guide and see where the UART pins are. Did we get lucky with a phone that has them on the SD card? Unfortunately not - we only get this image, which isn't very descriptive,
 and no shot of the board. Time for a teardown!
 
-{{ resize_image(path="XA2-UART-illustration_23_03_2023.png", height = 400, width=100, op="fit_height", caption="The UART location") }}
+{{ figure(src="XA2-UART-illustration_23_03_2023.png", width=300, height=50, caption="UART ports") }}
 
 The back plastic cover comes off fairly easily with a heatgun, revealing the inside of the phone. Make sure not to pull to hard as the fingerprint sensor ribbon cable is still connected.
-{{ resize_image(path="xa2_back_cover_straight.jpg", height = 400, width=100, op="fit_height", caption="The back cover partially removed") }}
+{{ figure(src="xa2_back_cover_straight.jpg", width=300, height=50, caption="The back cover partially removed") }}
 
 Next, there's just 3 screws to remove the plastic cover over the PCB:
-{{ resize_image(path="xa2_back_no_cover.jpg", height = 400, width=100, op="fit_height", caption="The back cover partially removed") }}
+{{ figure(src="xa2_back_no_cover.jpg", width=300, height=50, caption="The back cover partially removed") }}
 
-Do you see the UART pins? Me neither. They're right here, labelled TX and RX, on the left side:
-{{ resize_image(path="./xa2_uart_closeup.jpg", height = 400, width=100, op="fit_height", caption="Closeup of the UART TX and RX pins") }}
+Do you see the UART pins? Me neither - let's zoom in. They're right here, labelled TX and RX, on the left side:
+{{ figure(src="./xa2_uart_closeup.jpg", width=300, height=50, caption="Closeup of the UART TX/RX pins") }}
 
-Luckily they're not as small as the 8 JTAG pins are right above them.
+Luckily they're not as small as the 8 (presumably) JTAG pins right above them.
 
 # Soldering
-The first attempt at soldering some cut up breadboard jumper wires failed as it was hard to get the wires to actually stick to the pads. After buying some 26-AWG solid core wire
-(and using some hot glue) the second attempt went much better:
+The first attempt at soldering some cut up breadboard jumper wires failed as it was hard to get the wires to actually stick to the pads. After buying some 26-AWG wire (which was still too large)
+and using some hot glue, the second attempt went much better:
 
-{{ resize_image(path="./xa2_solder_closeup.jpg", height = 400, width=100, op="fit_height", caption="Closeup of the UART TX and RX pins") }}
+{{ figure(src="./xa2_solder_closeup.jpg", width=300, height=50, caption="Wires sucessfully soldered") }}
 
 # Reading the data
-Now, all we have to do is make use of the electricity flowing down these wires. Sony recommends soldering a connector to the board and using a USB-to-UART adapter, but I didn't have one
-and didn't want to wait for one to arrive. But I do have an ESP32 with some GPIO pins. Can I use those and (one of the 3) onboard UART controllers to read the information? Turns out, yes!
-ESP-IDF's UART API is simple to use, and we only need a few lines of code.
+Now, all we have to do is make use of the signals on these wires. Sony recommends soldering a connector to the board and using a USB-to-UART adapter, but I didn't have one
+and didn't want to wait for one to arrive. But I do have an ESP32 with some GPIO pins, and I know it has a UART peripheral. ESP-IDF's UART API is simple to use, and we only need a few lines of code.
 
 ```c
 #include <stdio.h>
@@ -115,9 +114,9 @@ void app_main(void)
 }
 ```
 
-This code sets up the UART controller with the correct baud rate and transmission settings, specifies which GPIO pins to use, and starts reading into a buffer in a loop.
-Here's the simple hardware setup - just an ESP32, a breadboard, and two wires.
-{{ resize_image(path="whole_setup.jpg", height = 400, width=100, op="fit_height", caption="The simple setup") }}
+This code sets up the UART peripheral with the correct baud rate and transmission settings, specifies which GPIO pins to use, and starts reading into a buffer in a loop.
+Here's the whole setup:
+{{ figure(src="whole_setup.jpg", width=300, height=50, caption="The simple setup") }}
 
 # Logs
 After flashing the code and rebooting the device, we do see some output. It works! Sort of.

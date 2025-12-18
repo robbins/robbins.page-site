@@ -1,28 +1,12 @@
 {
   "nodes": {
-    "apollo-zola": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1724709229,
-        "narHash": "sha256-C7tzJQZt62ETlUjnp9zVnUAAI7q8TdiIXnMWWbBL4ac=",
-        "owner": "robbins",
-        "repo": "apollo-custom",
-        "rev": "fca58065a72bdfe49582fc450551592a68a33f5a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "robbins",
-        "repo": "apollo-custom",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1672428209,
-        "narHash": "sha256-eejhqkDz2cb2vc5VeaWphJz8UXNuoNoM8/Op8eWv2tQ=",
+        "lastModified": 1753432016,
+        "narHash": "sha256-cnL5WWn/xkZoyH/03NNUS7QgW5vI7D1i74g48qplCvg=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "293a28df6d7ff3dec1e61e37cc4ee6e6c0fb0847",
+        "rev": "6027c30c8e9810896b92429f0092f624f7b1aace",
         "type": "github"
       },
       "original": {
@@ -34,8 +18,24 @@
     },
     "root": {
       "inputs": {
-        "apollo-zola": "apollo-zola",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "serene-zola": "serene-zola"
+      }
+    },
+    "serene-zola": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1760798732,
+        "narHash": "sha256-AZBzLp3gWcufvDIj3Ra87zw3M3hFUz8SEF08tjEq4VQ=",
+        "owner": "isunjn",
+        "repo": "serene",
+        "rev": "d13dc8def6257dadd911bc018699835b51c50951",
+        "type": "github"
+      },
+      "original": {
+        "owner": "isunjn",
+        "repo": "serene",
+        "type": "github"
       }
     }
   },

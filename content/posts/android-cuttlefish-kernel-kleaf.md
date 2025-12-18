@@ -30,14 +30,14 @@ $ m
 ```
 
 After waiting almost an hour and a half for a clean build to complete, we can finally run Cuttlefish with the `launch_cvd` command and check out the kernel version:
-```shell
+```Bash
 $ adb shell
 vsoc_x86_64:/ # cat /proc/version
 Linux version 6.6.30-android15-6-g0643e9e3d6b1-ab11895514 (kleaf@build-host) (Android (11368308, +pgo, +bolt, +lto, +mlgo, based on r510928) clang version 18.0.0 (https://android.googlesource.com/toolchain/llvm-project 477610d4d0d988e69dbc3fae4fe86bff3f07f2b5), LLD 18.0.0) #1 SMP PREEMPT Tue May 28 15:59:07 UTC 2024
 ```
 
-Looks like we're running version 6.6.30 from the android15 branch. For reference, that's defined here in `device/google/cuttlefish/vsoc_x86_64_pgagnostic/BoardConfig.mk`.
-```Make
+Looks like we're running version 6.6.30 from the `android15` branch.
+```Make,name=device/google/cuttlefish/vsoc_x86_64_pgagnostic/BoardConfig.mk
 # Use 6.6 kernel
 TARGET_KERNEL_USE ?= 6.6
 TARGET_KERNEL_ARCH ?= x86_64
@@ -62,7 +62,8 @@ $ repo sync
 $ tools/bazel run //common-modules/virtual-device:virtual_device_x86_64_dist
 ```
 
-{{ note(clickable=true, hidden=true, header="View source tree", body="```bash
+{% detail(title="View source tree", default_open=false) %}
+```Bash
 > ls -l
 total 44
 drwxr-xr-x  4 4096 Aug 24 19:29 build # Bazel
@@ -75,13 +76,14 @@ drwxr-xr-x  4 4096 Aug 26 06:46 out
 drwxr-xr-x 12 4096 Aug 24 19:30 prebuilts # Clang, GCC, JDK, NDK, etc.
 drwxr-xr-x  4 4096 Aug 24 19:29 test
 drwxr-xr-x  3 4096 Aug 24 19:29 tools # mkbootimg for creating Android boot.img's
-```") }}
+```
+{% end %}
 
 This build provides us with (among other things), an initramfs (`./out/virtual_device_x86_64/dist/initramfs.img`) and the kernel image itself (`./out/virtual_device_x86_64/dist/bzImage`).
 Now we can simply tell Cuttlefish to boot using these files:
 
 From the root of the AOSP source tree (in the same terminal you ran `m` from):
-```shell
+```bash
 launch_cvd --noresume \
   -initramfs_path ../path-to-kernel/../out/virtual_device_x86_64/dist/initramfs.img \
   -kernel_path ../path-to-kernel/../out/virtual_device_x86_64/dist/bzImage
@@ -98,8 +100,8 @@ We can see that we're running the new kernel now.
 # Building our custom kernel module
 Our goal for this will be to write a simple "Hello World" style kernel module that will be included in the build of the above kernel Bazel target.
 
-First, let's create our kernel module. From the root of your kernel checkout, create `vendor/hello_world.c` with the following contents:
-```c
+First, let's create our kernel module. From the root of your kernel checkout, create the following:
+```c,name=vendor/hello_world.c
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -175,10 +177,9 @@ vsoc_x86_64:/data/local/tmp # dmesg | grep -i 'world'
 ```
 
 But we'd like to have our modules loaded into the kernel automatically. 
-To do so, we can create a `kernel_module_group` and add that to the `kernel_modules_install` target of our kernel build, `//common-modules/virtual-device:virtual_device_x86_64`.
-In `vendor/BUILD.bazel`, add the following:
+To do so, we can create a `kernel_module_group` and add that to the `kernel_modules_install` target of our kernel build, `//common-modules/virtual-device:virtual_device_x86_64`, by adding the following:
 
-```bazel
+```bazel,name=vendor/BUILD.bazel
 load("//build/kernel/kleaf:kernel.bzl", "kernel_module_group")
 
 kernel_module_group(
@@ -192,8 +193,8 @@ kernel_module_group(
 
 Make sure to set the visibility so that this target will be available in the `common-modules/virtual-device` package.
 
-Then, add this group in `common-modules/virtual-device/BUILD.bazel`:
-```bazel
+Then, add this group:
+```bazel,name=common-modules/virtual-device/BUILD.bazel
 kernel_modules_install(
     name = "virtual_device_x86_64_modules_install",
     kernel_build = ":virtual_device_x86_64",
@@ -206,7 +207,7 @@ kernel_modules_install(
 
 Now, we can build the entire kernel with our modules with `tools/bazel run //common-modules/virtual-device:virtual_device_x86_64_dist`.
 Verifying that it worked (running Cuttlefish with the same command as above to make it use our kernel):
-```shell
+```bash
 vsoc_x86_64:/ # lsmod | grep hello_world
 hello_world            12288  0
 ```

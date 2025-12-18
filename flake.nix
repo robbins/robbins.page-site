@@ -1,13 +1,12 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    apollo-zola = { url = "github:robbins/apollo-custom"; flake = false; };
-    #apollo-zola = { url = "git+file:///home/nate/src/github.com/robbins/apollo-custom"; flake = false; };
+    serene-zola = { url = "github:isunjn/serene"; flake = false; };
   };
   
-  outputs = { self, nixpkgs, apollo-zola}:
+  outputs = { self, nixpkgs, serene-zola}:
     let
-      themeName = "apollo";
+      themeName = "serene";
       pkgs = import nixpkgs { system = "x86_64-linux"; };
     in
     {
@@ -17,7 +16,7 @@
         buildInputs = with pkgs; [ zola ];
         configurePhase = ''
           mkdir -p "themes/${themeName}"
-          cp -r ${apollo-zola}/* "themes/${themeName}"
+          cp -r ${serene-zola}/* "themes/${themeName}"
         '';
         buildPhase = ''
           zola build
@@ -30,7 +29,7 @@
           packages = [ pkgs.zola ];
           shellHook = ''
             mkdir -p themes
-            ln -snf "${apollo-zola}" "themes/${themeName}"
+            ln -snf "${serene-zola}" "themes/${themeName}"
           '';
         };
     };
