@@ -155,3 +155,23 @@ out/kernel: Linux kernel ARM64 boot executable Image, little-endian, 4K pages
 > mkbootimg $(cat mkbootimg_args) --output repacked.img
 > fastboot boot repacked.img
 ```
+
+# Disappointment
+Booted into AOSP recovery, we see some kernel logs about the feature:
+```Bash
+[    1.148174] msm-eud 1628000.qcom,msm-eud: TCSR qcom_scm_io_writel failed with rc:-22
+[    1.148237] 1628000.qcom,msm-eud: ttyEUD0 at MMIO 0x0 (irq = 30, base_baud = 0) is a EUD UART
+```
+
+MMIO 0x0 doesn't seem like a good sign, but msm_eud_probe doesn't return an error if the TCSR (Top Control and Status Register, used for peripheral configuration) write fails.
+
+Our `eud_reg_base` is 0x16280000 and EUD_REG_CSR_EUD_EN is 0x1014, but unfortunately we don't get what we're looking for:
+```Bash
+# devmem 0x16281014 4 1
+--- one reboot later ---
+# cat /sys/fs/pstore/console-ramoops-0  | tail -n2
+[  374.069907] msm_watchdog f410000.qcom,wdt: Causing a QCOM Apps Watchdog bite!
+[  374.077049] msm_watchdog f410000.qcom,wdt: Wdog - STS: 0xb0d52, CTL: 0x3, BARK TIME: 0x57fdf, BITE TIME: 0x6ffd6
+```
+
+So, unfortunately, it doesn't look like we are able to enable EUD on the Moto G50.
