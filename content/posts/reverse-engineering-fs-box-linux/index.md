@@ -1,5 +1,5 @@
 +++
-title = "Reverse-engineering the FS Box SFP programmer to make it work on Linux (POC)"
+title = "Reverse-engineering the FS Box SFP programmer to avoid using Windows"
 date = "2026-06-12"
 
 [taxonomies]
@@ -14,7 +14,7 @@ In theory, doing so is easy. For example, you can use a Raspberry Pi with an SFP
 
 I wanted to see if there might be any useful information we can gain about these passwords, as well as fulfilling some curiosity I had about the FS Box, which I had used to sucessfully program some SFP modules from FS.com (which, apparently, are the only types of SFP modules it will accept without getting your account deactivated).
 
-# What are we dealing with
+# Exploration
 We start with the physical hardware itself:
 {{ figure(src="./PCB_Top.jpeg", width=300, height=300, caption="PCB Top") }}
 {{ figure(src="./PCB_Bottom.jpeg", width=300, height=300, caption="PCB Bottom") }}
@@ -147,11 +147,11 @@ Collection (Application)
 End Collection
 ```
 
+# POC of Linux Support
 After reading the decompiled DLLs, we can create a Python script to replicate the "challenge-response" flow and communicate with the FS Box from Linux, without needing their driver or the website.
 It expects 257-byte payloads (+1 byte for the HID output report ID), where byte 1 is a checksum, byte 2 is the command, byte 3-255 is data or 0, and byte 256 is 0x24 ($).
 The challenge-response would present a roadblock if we were just sniffing the USB communication, since it changes on every connection attempt, but we can just follow the logic from the DLLs. There isn't any cryptography going on.
 For example, `02 24 FE 00 .. 00 24` turns off Bluetooth.
-
 
 I've just plugged in an SFP module with nothing attached on the other end, and we can see some basic functionality:
 {{ figure(src="./fs-box-sfp.jpeg", width=300, height=300, caption="FS Box with an SFP plugged in") }}
@@ -166,6 +166,8 @@ SFP Detected - RX LOS triggered
 At this point, all other functionality is simply a matter of translating the code from the DLLs to a custom implementation in whatever language you like, and maybe a fancy GUI to go along with it. That said, when other devices like the [SFP^2 Buddy](https://oopselectronics.com/product/SFP2) exist for EEPROM programming and much more, there's not much point to actually re-purposing these FS Boxes.
 I got bored here, but this might be a great use case for an LLM! It could probably make short work of it and re-create all the functionality fairly easily.
 
-# Conclusions
-There's no special sauce that the FS Box hardware requires from the website / FS.com servers to work as a basic SFP programmer. However, it seems like EEPROM pins are sent server-side - I don't have an active license so didn't look at that side of things, although it would be doable just by reading the decompiled DLL code.
-There's also the FS Box STM32 firmware itself that I may take a look at in the future. I've published my initial POC for the HID setup & communication [here](github.com/robbins/fs-box-hid-linux) on GitHub.
+# (Unfortunate) Conclusions
+There's no special sauce that the FS Box hardware requires from the website / FS.com servers to work as a basic SFP programmer. 
+However, it seems like EEPROM passwords are sent server-side - I don't have an active license so didn't look at that side of things, although it would be doable just by reading the decompiled DLL code.
+There's also the FS Box STM32 firmware itself that I may take a look at in the future, as well as the Android apps.
+I've published my initial POC for the HID setup & communication [here](github.com/robbins/fs-box-hid-linux) on GitHub.
