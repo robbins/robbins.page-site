@@ -2054,6 +2054,20 @@ private void readAllPermissions() {
 public static final String FEATURE_WIFI = "android.hardware.wifi";
 ```
 
+To make sure, we can list all the activites in the Settings app:
+```bash
+ibiza:/ $ dumpsys package | grep com.android.settings | grep Activity
+        a27c309 com.android.settings/.Settings$ApnEditorActivity
+        3628d3 com.android.settings/.Settings$PublicVolumeSettingsActivity
+        a27c309 com.android.settings/.Settings$ApnEditorActivity
+        3628d3 com.android.settings/.Settings$PublicVolumeSettingsActivity
+```
+and we see that certain ones that don't trigger that codepath will start:
+```bash
+ibiza:/ $ am start com.android.settings/.SettingsLicenseActivity
+```
+
+
 Thus we can add:
 ```Make,path=device/motorola/ibiza/device-ibiza.mk
 PRODUCT_COPY_FILES +=
