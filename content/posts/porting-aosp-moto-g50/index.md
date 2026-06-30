@@ -1,6 +1,6 @@
 +++
-title = "AOSP Porting Log for the Moto G50"
-date = "2026-06-19"
+title = "Porting AOSP to the Moto G50 (WIP Build log)"
+date = "2026-06-13"
 
 [taxonomies]
 tags=["aosp", "android"]
@@ -2028,4 +2028,142 @@ This service is registered by the `SystemServer` if the WiFi feature is enabled:
       t.traceBegin("StartWifi");
       mSystemServiceManager.startServiceFromJar(
               WIFI_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
+```
+
+and enabled features are determined by reading XML files under `{system,vendor,odm,product}/etc/{sysconfig,permission}`:
+```Java,name=frameworks/base/core/java/com/android/server/SystemConfig.java
+private void readAllPermissions() {
+        // Read configuration from system
+        readPermissions(Environment.buildPath(
+                Environment.getRootDirectory(), "etc", "sysconfig"), ALLOW_ALL);
+
+        // Read configuration from the old permissions dir
+        readPermissions(Environment.buildPath(
+                Environment.getRootDirectory(), "etc", "permissions"), ALLOW_ALL);
+
+        // Vendors are only allowed to customize these
+        int vendorPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PRIVAPP_PERMISSIONS
+                | ALLOW_ASSOCIATIONS | ALLOW_VENDOR_APEX;
+        readPermissions(Environment.buildPath(
+                Environment.getVendorDirectory(), "etc", "sysconfig"), vendorPermissionFlag);
+        readPermissions(Environment.buildPath(
+                Environment.getVendorDirectory(), "etc", "permissions"), vendorPermissionFlag);
+```
+
+```Java,name=frameworks/base/core/java/android/content/pm/PackageManager.java
+public static final String FEATURE_WIFI = "android.hardware.wifi";
+```
+
+Thus we can add:
+```Make,path=device/motorola/ibiza/device-ibiza.mk
+PRODUCT_COPY_FILES +=
+frameworks/native/data/etc/android.hardware.wifi.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.wifi.xml
+```
+
+and Settings no longer crashes.
+
+## Fixing missing software navigation buttons/bar
+{{ figure(src="./no_nav.png", width=300, height=50, caption="No buttons!") }}
+We have selected 3-button navigation, but the bar isn't visible. If we select gesture navigation, we can go home by swiping up, but the bar isn't visible.
+Selecting either option prompts the respective overlay to be loaded, which sets some Android resource values (their source is `frameworks/base/packages/overlays/Android.mk`):
+```Bash
+06-25 17:54:30.599   874   874 D NavigationModeController: ACTION_OVERLAY_CHANGED
+06-25 17:54:30.599   874   874 D NavigationModeController: getCurrentUserContext: contextUser=0 currentUser=0
+06-25 17:54:30.599   874   874 D NavigationModeController: getCurrentInteractionMode: mode=2 contextUser=0
+06-25 17:54:30.599   874   874 D NavigationModeController: updateCurrentInteractionMode: mode=2
+06-25 17:54:30.599   874   874 D NavigationModeController:   contextUser=0
+06-25 17:54:30.599   874   874 D NavigationModeController:   assetPaths=
+06-25 17:54:30.599   874   874 D NavigationModeController:     <empty> and /system/framework/framework-res.apk
+06-25 17:54:30.599   874   874 D NavigationModeController:     <empty> and /system_ext/priv-app/SystemUI/SystemUI.apk
+06-25 17:54:30.599   874   874 D NavigationModeController:     /product/overlay/NavigationBarModeGestural/NavigationBarModeGesturalOverlay.apk
+06-25 17:54:30.599   874   874 D NavigationModeController:     /data/resource-cache/com.android.systemui-neutral-oLG0.frro
+06-25 17:54:30.599   874   874 D NavigationModeController:     /data/resource-cache/com.android.systemui-accent-UdhC.frro
+06-25 17:54:32.504   874   874 D NavigationModeController: onOverlayChanged
+06-25 17:54:32.505   874   874 D NavigationModeController: getCurrentUserContext: contextUser=0 currentUser=0
+06-25 17:54:32.505   874   874 D NavigationModeController: getCurrentInteractionMode: mode=0 contextUser=0
+06-25 17:54:32.505   874   874 D NavigationModeController: updateCurrentInteractionMode: mode=0
+06-25 17:54:32.505   874   874 D NavigationModeController:   contextUser=0
+06-25 17:54:32.505   874   874 D NavigationModeController:   assetPaths=
+06-25 17:54:32.505   874   874 D NavigationModeController:     <empty> and /system/framework/framework-res.apk
+06-25 17:54:32.505   874   874 D NavigationModeController:     <empty> and /system_ext/priv-app/SystemUI/SystemUI.apk
+06-25 17:54:32.505   874   874 D NavigationModeController:     /product/overlay/NavigationBarModeGestural/NavigationBarModeGesturalOverlay.apk
+06-25 17:54:32.505   874   874 D NavigationModeController:     /data/resource-cache/com.android.systemui-neutral-oLG0.frro
+06-25 17:54:32.505   874   874 D NavigationModeController:     /data/resource-cache/com.android.systemui-accent-UdhC.frro
+06-25 17:54:32.505   874   874 D NavigationModeController:     /data/app/~~km9ilLqjsyb8Uigi6VTFgQ==/com.android.internal.systemui.navbar.threebutton-64HbNuOxTp7AyohqH8OZBg==/base.apk
+```
+and these APKs are installed in our system image.
+011
+However, we also see this:
+```Java,name=frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/common/DisplayLayout.java
+    static boolean hasNavigationBar(DisplayInfo info, Context context, int displayId) {
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            // Allow a system property to override this. Used by the emulator.
+            final String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
+            if ("1".equals(navBarOverride)) {
+                return false;
+            } else if ("0".equals(navBarOverride)) {
+                return true;
+            }
+            return context.getResources().getBoolean(R.bool.config_showNavigationBar);
+        } 
+        ...
+    }
+```
+
+and for a quick test, `adb shell setprop qemu.hw.mainkeys 0 && adb shell stop & adb shell start` brings back our buttons!
+{{ figure(src="./nav.png", width=300, height=50, caption="Buttons!") }}
+
+But this is a real device, not a QEMU emulator, so we should override `config_showNavigationBar` with an overlay in our device tree, instead of modifying SystemUI resources directly.
+```diff,name=device/motorola/ibiza/device-ibiza.mk
+diff --git a/device-ibiza.mk b/device-ibiza.mk
+index 9c6ead3..4b3e9ca 100644
+--- a/device-ibiza.mk
++++ b/device-ibiza.mk
+@@ -113,5 +113,7 @@ PRODUCT_PACKAGES += \
+
+ PRODUCT_COPY_FILES += frameworks/native/data/etc/android.hardware.wifi.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.wifi.xml
+
++DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay
++
+ # Inherit from the proprietary files makefile.
+ $(call inherit-product, vendor/motorola/ibiza/ibiza-vendor.mk)
+diff --git a/overlay/frameworks/base/core/res/res/values/config.xml b/overlay/frameworks/base/core/res/res/values/config.xml
+new file mode 100644
+index 0000000..15eea06
+--- /dev/null
++++ b/overlay/frameworks/base/core/res/res/values/config.xml
+@@ -0,0 +1,4 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <bool name="config_showNavigationBar">true</bool>
++</resources>
+```
+
+## Fixing the brightness slider
+```Bash
+06-25 19:18:06.071 11760 11857 E HWComposer: operator(): operator() failed for display 4630946747577212033: NoResources (6)
+06-25 19:18:06.071 11816 11989 E SurfaceFlinger: setDisplayBrightness: failed to transact: -2147483648
+06-25 19:18:06.081 11816 11989 E DisplayDeviceConfig: requesting nits when no mapping exists.
+06-25 19:18:06.081 11816 11989 E DisplayDeviceConfig: requesting nits when no mapping exists.
+06-25 19:18:06.088   538   538 E SDM     : HWPeripheralDRM::SetPanelBrightness: Failed to open node = /sys/class/backlight/panel0-backlight/brightness, error = Permission denied
+06-25 19:18:06.088 11760 11857 E HWComposer: operator(): operator() failed for display 4630946747577212033: NoResources (6)
+06-25 19:18:06.089 11816 11989 E SurfaceFlinger: setDisplayBrightness: failed to transact: -2147483648
+06-25 19:18:06.109 11816 11854 V DisplayPowerController[0]: Brightness [0.32867655] reason changing to: 'manual', previous reason: 'temporary'.
+06-25 19:18:06.109 11816 11989 E DisplayDeviceConfig: requesting nits when no mapping exists.
+06-25 19:18:06.109 11816 11989 E DisplayDeviceConfig: requesting nits when no mapping exists.
+06-25 19:18:06.110   538   538 E SDM     : HWPeripheralDRM::SetPanelBrightness: Failed to open node = /sys/class/backlight/panel0-backlight/brightness, error = Permission denied
+```
+
+We can see that the display composer HAL runs as the system user: `system         538     1 11155404 19464 binder_thread_read  0 S vendor.qti.hardware.display.composer-service`, so we simply need to `chown` the sysfs node.
+
+```diff
+diff --git a/init/init.hardware.rc b/init/init.hardware.rc
+index eff2cdc..88c79aa 100644
+--- a/init/init.hardware.rc
++++ b/init/init.hardware.rc
+@@ -22,6 +22,10 @@ on fs
++on early-boot
++    chown system system /sys/class/backlight/panel0-backlight/brightness
++    chown system system /sys/class/backlight/panel0-backlight/max_brightness
++
 ```
