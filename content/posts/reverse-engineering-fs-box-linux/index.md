@@ -182,7 +182,7 @@ As an example of the commands, `02 24 FE 00 00 .. 00 00 24` turns off Bluetooth 
 At this point, all other functionality is simply a matter of translating the code from the DLLs to a custom implementation in whatever language you like, and maybe a fancy GUI to go along with it. That said, when other devices like the [SFP^2 Buddy](https://oopselectronics.com/product/SFP2) exist for EEPROM programming and much more, there's not much point to actually re-purposing these FS Boxes.
 I got bored here, but this might be a great use case for an LLM! It could probably make short work of it and re-create all the functionality fairly easily.
 
-# Microcontroller Firmware
+# Microcontroller Firmware FSBV4013.bin
 ```
 FSBV4013.bin:           ARM Cortex-M firmware, initial SP at 0x2001dca0, reset at 0x0802019c, NMI at 0x08029934, HardFault at 0x080281fc, SVCall at 0x0802ab4c, PendSV at 0x08029b46
 ```
@@ -457,8 +457,17 @@ else if (command_also == Handle_Check) {
 ```
 It's what I already knew, just a bit harder to figure out, but slightly easier than it would've been since I already knew what I was looking for.
 
-## Next Steps
+# Microcontroller Firmware Part 2 - FSBV4_2202.bin
+```Bash
+FSBV4_2202.bin:         ARM Cortex-M firmware, initial SP at 0x2000f768, reset at 0x08004244, NMI at 0x08007fec, HardFault at 0x08006c04, SVCall at 0x08008858, PendSV at 0x0800846c
+```
+
+This seems to be loaded at 0x08004000, and seems to be very similar firmware. It also performs the decompression routine above, but for a different, smaller set of data that's missing at least the AT commands. References to Bluetooth code seem to be missing,
+and the command handler loop seems to only handle a subset of commands. It still requires the challenge-response process, and that data is part of the compressed data.
+
+# Next Steps
 The AT commands, presumably for the Bluetooth module, are still to be investigated. There are also some pointers in the decompressed data to functions, so the structure of how it's all used should be looked at as well.
+The Bluetooth side of things from the app can also still be looked into.
 
 # (Unfortunate) Conclusions
 It doesn't look like there's any special sauce that the FS Box hardware requires from the website / FS.com servers to work as a basic SFP programmer, provided all the commands were re-implemented.
