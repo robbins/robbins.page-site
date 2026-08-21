@@ -41,6 +41,8 @@ Page Per Block: 64
 Total Blocks: 4096
 ```
 
+{{ figure(src="xgecu.jpeg", width=300, height=50, caption="Chip in the socket") }}
+
 # Binwalk
 Binwalk seemed to be able to find some partition/filesystem information (to be honest, I don't quite understand the stack of MTD->UBI->UBIFS),
 ```Bash
