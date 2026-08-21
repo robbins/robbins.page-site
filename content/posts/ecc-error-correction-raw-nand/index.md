@@ -6,9 +6,9 @@ date = "2026-08-18"
 tags=["reverse-engineering", "hardware-hacking", "nand", "linux"]
 +++
 
-{{ note(header="Disclaimer", body="This is mostly a summation of pre-existing information on this topic, I didn't contribute much that's novel. But, as I went from knowing basically nothing about the practical side of this when I first started, plus some small tweaks for my setup, I thought it might be useful to write about the process I followed, mis-steps included, to maybe make it even slightly more approachable for others.") }}
+{{ note(header="Disclaimer", body="This started out as mostly a summation of pre-existing information on this topic but I thought it might be useful to have a demonstration of the practical applications and my process, as I tried to do this for the first time knowing hardly anything, mis-steps included. And while there were many, I ending up finding and fixing a bug in the tool I was using, so it ending up being even more useful than I'd thought!") }}
 
-# Context
+# Context / Tangent
 This all started when I decided to follow the excellent [pon.wiki](https://pon.wiki/) to replace my ISP's modem/router/AP combination with my own equipment.
 Their guides, along with the excellent [8311 Discord](https://pon.wiki/discord/) and some very helpful members, helped me achieve that goal.
 Huge shoutout to @up-n-atom, as I gathered a huge amount of information combing through all the messages he's sent on that server :)
@@ -277,9 +277,9 @@ So, the steps to follow are:
 4 bit errors in sector 0 of page 243678: 1717 1202 4065 951
 ```
 
-It seems like we're really pushing the limits of our ECC - one more bit error in any of those 512B regions and we wouldn't be able to correct it!
+It seems like we're really pushing the limits of our ECC - one more bit error in any of those 512B regions and we wouldn't be able to correct it! (Spoiler for the rest of the article: we weren't).
 
-# Verifying our work (and something's still wrong)
+# Verifying our work (is something wrong?)
 We can re-encode the data and compare to see if we're generating the right ECC bytes:
 ```
 > cat S34ML04G2_flashmain.bin.ecc-shortened | ./reencode 0x5803 > verify.out
@@ -302,3 +302,180 @@ Unfortunately, it seems like 12 sectors have different ECC data than we're gener
 Maybe we had one too many bit errors in a segment like I alluded to above? I may try re-reading the chip and seeing if I get a different result, but for now,
 it looks like we're as close as we can get. The Binwalk output is much better, and is including whole files it missed before, like the Linux kernel image,
 so I'll call it a success.
+
+## Update - Reading the chip again (and something's definitely wrong)
+I am even more confused now than I was earlier. I spun up a Windows VM to run the Xgpro software and read the chip, and after re-calculating the ECC
+bytes for this new read:
+```
+poly 22531 different OOB sectors: 22
+```
+
+Why did the number of different sectors almost double? I went back to the software and noticed it has an option for bit flip permission:
+{{ figure(src="bit-flip-permission.png", width=800, height=100, caption="Bit Flip Permission") }}
+
+This seems to be used in the "Verify" function, which reads the chip a second time and compares the two reads, considering it a pass if there are less than
+n bit errors per m-byte segment, which the ECC can successfully correct. But this methodology seems flawed to me, because the read we're comparing against
+isn't the ground truth but could also contain bit flips -- so a sector could easily have more than 4 bit errors compared to the ground truth, which
+is what actually matters. For example, having 4 bit flips in a sector on the first read, and then 5 bit flips on the second.
+
+Nevertheless, I noticed the Verify step was set to 8b/512B whereas my NAND ECC can only correct 4b/512B, so I changed the setting but the verification still passed.
+I then disabled the setting entirely, and across 2 separate reads, it reports:
+```
+Block#437 Verify error Bytes: 1
+Block#2501 Verify error Bytes: 1
+Verify Error Blocks: 2
+```
+
+I guess it can only compare bytes and not bits, but this means there was at most 8 bits different in an entire block, which is 64 pages, or over 130,000 bytes.
+NAND bit flips *aren't* independent, so I suppose it is more likely than random chance that > 4 could be in a single 512-byte region, but even with 16 bit flips,
+we couldn't even have 12 or 22 different sectors with more than 4 bit errors. Diffing 2 separate reads bit-by-bit myself, 
+I found 9 sectors each with a single bit difference. So it seems like there's very low error variance between reads.
+
+What's interesting is that I ran a read+verify a few times, and got 1 byte in Block#437 3 times and got this exact same result twice.
+
+Looking at the specific sectors that had different calculated ECC values in our 2nd read, we see that every single sector that shows up in
+the first read, shows up in the second read.
+```
+errors in sector 3 of page 12096
+errors in sector 3 of page 20416
+errors in sector 1 of page 22656
+errors in sector 1 of page 35206
+errors in sector 3 of page 36665
+errors in sector 2 of page 65531
+errors in sector 1 of page 66154
+errors in sector 3 of page 93918
+errors in sector 2 of page 106112
+errors in sector 3 of page 115264
+errors in sector 3 of page 127232
+errors in sector 0 of page 140480
+errors in sector 1 of page 157484
+errors in sector 2 of page 168192
+errors in sector 2 of page 172578
+errors in sector 2 of page 189888
+errors in sector 1 of page 190400
+errors in sector 2 of page 201489
+errors in sector 2 of page 210048
+errors in sector 1 of page 210304
+errors in sector 2 of page 226659
+```
+
+So it seems like our reads are far off from the ground truth value...
+
+But if we look at the sectors where errors were reported:
+```
+4 bit errors in sector 0 of page 2079: 3249 329 2512 1040
+4 bit errors in sector 0 of page 2143: 3249 329 2512 1040
+4 bit errors in sector 3 of page 29911: 3574 2659 855 3364
+3 bit errors in sector 1 of page 31717: 1159 111 49
+4 bit errors in sector 0 of page 33060: 3580 1751 2555 3096
+4 bit errors in sector 2 of page 39243: 1819 2578 2383 600
+4 bit errors in sector 0 of page 39785: 265 522 1606 837
+4 bit errors in sector 2 of page 40530: 2157 3435 1033 3937
+4 bit errors in sector 2 of page 41140: 1143 3067 2023 3658
+4 bit errors in sector 0 of page 43947: 2803 2180 3153 3585
+4 bit errors in sector 1 of page 45646: 2361 706 548 3655
+4 bit errors in sector 0 of page 48830: 2739 1531 1878 2999
+4 bit errors in sector 3 of page 48987: 1242 3614 3902 2224
+4 bit errors in sector 3 of page 50395: 3958 549 450 2708
+4 bit errors in sector 0 of page 51046: 1067 641 1948 3809
+4 bit errors in sector 1 of page 51551: 2687 1561 4200 3888
+4 bit errors in sector 0 of page 54560: 2663 423 264 2351
+4 bit errors in sector 1 of page 55909: 2909 128 4072 1227
+4 bit errors in sector 3 of page 59287: 3574 2659 855 3364
+4 bit errors in sector 0 of page 60814: 691 2759 4060 2270
+3 bit errors in sector 1 of page 61093: 1159 111 49
+4 bit errors in sector 0 of page 63606: 2092 1046 3210 3195
+4 bit errors in sector 2 of page 65076: 1722 3095 831 1811
+4 bit errors in sector 1 of page 65174: 3570 1099 3007 3592
+4 bit errors in sector 1 of page 67238: 4082 3535 3533 969
+4 bit errors in sector 1 of page 68183: 902 2842 1668 287
+4 bit errors in sector 1 of page 70056: 2196 570 3358 2295
+4 bit errors in sector 2 of page 84395: 2725 1164 4108 3740
+4 bit errors in sector 2 of page 87032: 2028 2448 2006 1842
+4 bit errors in sector 1 of page 87340: 2589 224 2592 4122
+4 bit errors in sector 0 of page 92582: 2444 3446 3306 3049
+4 bit errors in sector 3 of page 92848: 738 2423 326 4065
+4 bit errors in sector 3 of page 93115: 147 1532 3416 2964
+4 bit errors in sector 2 of page 94171: 61 727 1818 559
+4 bit errors in sector 0 of page 157921: 1527 1730 2664 3010
+4 bit errors in sector 0 of page 185896: 3201 1179 1210 3230
+4 bit errors in sector 1 of page 205672: 2330 2532 3154 2187
+4 bit errors in sector 0 of page 243678: 1717 1202 4065 951
+```
+
+**they're identical**. Ok, something's definitely wrong now.
+
+## The code has a bug
+What I didn't realize the first time I did this, however, is that these two outputs don't correlate. The sets of pages that errors are detected in and pages errors are corected in are entirely disjoint.
+The detection of errors looks correct since many overlap with our initial read, but there has to be something wrong with the decoding. And indeed:
+```diff
+diff --git a/decode.c b/decode.c
+index c83ba57..d420332 100644
+--- a/decode.c
++++ b/decode.c
+@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
+
+                 // Consume ECC
+                 unsigned int errlocs[BCH_T];
+-                int nerr = decode_bch(bch, buffer, SECTOR_SZ + OOB_ECC_OFS, sector_oob, NULL, NULL, &errlocs[0]);
++                int nerr = decode_bch(bch, buffer, SECTOR_SZ + OOB_ECC_OFS, sector_oob + OOB_ECC_OFS, NULL, NULL, &errlocs[0]);
+                 if (nerr < 0) {
+                     numdecodeerrors++;
+                 } else if (nerr > 0) {
+```
+
+It was missing the offset and using the padding instead of the parity bytes. After re-writing the code myself to work with 128-byte spare regions (but still only 64-bytes used for ECC), I get an identical and very different result:
+```
+1 bit errors in sector 3 of page 12096: 1917
+1 bit errors in sector 3 of page 20416: 3690
+1 bit errors in sector 1 of page 22656: 1243
+1 bit errors in sector 1 of page 35206: 356
+1 bit errors in sector 3 of page 36665: 3384
+1 bit errors in sector 2 of page 65531: 3297
+1 bit errors in sector 1 of page 66154: 381
+1 bit errors in sector 3 of page 93918: 2170
+1 bit errors in sector 2 of page 106112: 719
+1 bit errors in sector 3 of page 115264: 367
+1 bit errors in sector 3 of page 127232: 1255
+1 bit errors in sector 0 of page 140480: 2175
+1 bit errors in sector 1 of page 157484: 3082
+1 bit errors in sector 2 of page 168192: 4025
+1 bit errors in sector 2 of page 172578: 707
+1 bit errors in sector 2 of page 189888: 1929
+1 bit errors in sector 1 of page 190400: 1726
+1 bit errors in sector 2 of page 201489: 1359
+1 bit errors in sector 2 of page 210048: 2296
+1 bit errors in sector 1 of page 210304: 2111
+1 bit errors in sector 2 of page 226659: 1567
+```
+
+These pages match where the errors were detected, and also make much more sense. This is SLC NAND, so it should be the most reliable due to having only 2 voltage states per cell -- 1 bit error in a page makes sense.
+I was also able to confirm a few of these which were obvious in that they were bit flips in pages almost entirely filled with zeroes, so they stood out as likely invalid.
+
+# Conclusions
+The "verify" feature of XGPro is definitely less than useful - across 2 separate reads, it reports only a single error:
+```
+> cat read1/verify_log
+Block#2501 Verify error Bytes: 1
+> cat read2/verify_log
+Block#437 Verify error Bytes: 1
+```
+
+but that's only because both reads have the exact same ~20 other errors:
+```
+> diff <(cat read1.bin | ./a.out 0x5803 2> >(sort) >/dev/null) <(cat read2.bin | ./a.out 0x5803 2> >(sort) >/dev/null)
+21a22
+> 1 bit errors at positions: 812
+40a42
+> Generated parity data for message 3 in page 27968 @ 60858368, block 437 differs
+
+> cat read2.bin | ./a.out 0x5803 > /dev/null 2> >(wc -l)
+44
+> cat read1.bin | ./a.out 0x5803 > /dev/null 2> >(wc -l)
+42
+```
+(2 lines per error)
+
+So NAND bit flips seem to be highly correlated. 
+
+And now that the bug is fixed, I can correct multiple dumps and get identical files.
